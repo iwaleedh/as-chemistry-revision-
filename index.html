@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AS Chemistry: Topic 2 Master Revision</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #27ae60; /* Green for answers */
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-q: #000000;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        /* Header & Dashboard */
+        header {
+            max-width: 900px;
+            margin: 0 auto 30px auto;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        h1 { margin: 0; font-weight: 800; color: var(--primary); font-size: 2.2rem; }
+        .sub-header { color: #7f8c8d; font-size: 1rem; font-weight: 500; }
+
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            background: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            border: 1px solid #eee;
+        }
+
+        /* Timer */
+        #timer {
+            font-size: 1.6rem;
+            font-weight: bold;
+            font-family: monospace;
+            color: #c0392b;
+            min-width: 90px;
+            text-align: center;
+        }
+
+        /* Score Circle */
+        .score-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            flex-direction: column;
+            line-height: 1;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 4px solid white;
+        }
+        .score-fraction { display: flex; flex-direction: column; align-items: center; }
+        .numerator { border-bottom: 2px solid white; padding-bottom: 2px; display: block; width: 100%; text-align: center;}
+        .denominator { padding-top: 2px; display: block; }
+
+        /* Buttons */
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: transform 0.2s, background 0.2s;
+        }
+        .btn:hover { background-color: #34495e; transform: scale(1.05); }
+        .btn-pdf { background-color: #e67e22; }
+
+        /* Q&A Block Styles */
+        .qa-container { max-width: 900px; margin: 0 auto; }
+
+        .section-title {
+            margin: 50px 0 20px 0;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 10px;
+            color: var(--primary);
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .qa-block {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            border-left: 6px solid var(--primary);
+            break-inside: avoid;
+        }
+        
+        .qa-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--text-q);
+            flex: 1;
+            margin-right: 20px;
+        }
+
+        .score-select-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            min-width: 100px;
+        }
+        
+        label { font-size: 0.75rem; color: #7f8c8d; margin-bottom: 4px; font-weight: bold; text-transform: uppercase; }
+        
+        select {
+            padding: 5px 10px;
+            border-radius: 6px;
+            border: 1px solid #bdc3c7;
+            font-size: 1rem;
+            cursor: pointer;
+            background: #fff;
+            outline: none;
+        }
+        select:focus { border-color: var(--primary); }
+
+        .reveal-btn {
+            background: #f8f9fa;
+            color: var(--primary);
+            border: 1px solid #dfe6e9;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .reveal-btn:hover { background: #eef2f3; }
+        .reveal-btn::after { content: '▼'; font-size: 0.8rem; }
+        .reveal-btn.active::after { content: '▲'; }
+
+        .answer-content {
+            display: none;
+            margin-top: 15px;
+            padding: 20px;
+            background: #f0fdf4; /* Very light green bg for answer area */
+            border-radius: 8px;
+            border: 1px solid #d1e7dd;
+            color: var(--accent);
+        }
+        
+        .answer-content.visible { display: block; animation: fadeIn 0.4s; }
+        .answer-content ul { padding-left: 20px; margin: 0; }
+        .answer-content li { margin-bottom: 8px; }
+
+        /* Diagrams */
+        .diagram-container {
+            margin: 15px 0;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border: 1px dashed #ccc;
+        }
+        svg { max-width: 100%; height: auto; }
+
+        /* Electron Box Diagram Styling */
+        .electron-box-container { display: flex; gap: 5px; justify-content: center; margin-top: 10px; }
+        .e-box {
+            width: 40px; height: 40px; border: 2px solid #27ae60;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.2rem; background: white;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Print/PDF Styles */
+        @media print {
+            .controls, .reveal-btn { display: none !important; }
+            .answer-content { display: block !important; border: none; background: none; color: #000 !important; padding: 10px 0; }
+            .qa-block { border: 1px solid #000; box-shadow: none; margin-bottom: 20px; page-break-inside: avoid; }
+            body { background: white; padding: 0; font-size: 12pt; }
+            .section-title { font-size: 1.4rem; margin-top: 30px; border-bottom: 2px solid #000; }
+            header { margin-bottom: 20px; }
+            .score-select-container { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>AS Chemistry: Topic 2</h1>
+    <span class="sub-header">Atomic Structure & The Periodic Table (62 High Frequency Questions)</span>
+    
+    <div class="controls">
+        <div id="timer">00:00</div>
+        <div class="score-circle">
+            <div class="score-fraction">
+                <span class="numerator" id="totalScore">0</span>
+                <span class="denominator" id="maxScore">0</span>
+            </div>
+        </div>
+        <button class="btn btn-pdf" onclick="window.print()">Download PDF</button>
+    </div>
+</header>
+
+<div class="qa-container" id="quiz-container">
+    </div>
+
+<script>
+    // --- DATA ---
+    const questionsDB = [
+        // 2.1 Atomic structure
+        { section: "2.1 Atomic Structure", q: "State the relative positions of protons, neutrons and electrons in an atom.", a: ["Protons and Neutrons: Nucleus (center)", "Electrons: Orbitals/Shells surrounding the nucleus"] },
+        { section: "2.1 Atomic Structure", q: "Explain why atoms have no overall electrical charge.", a: ["They contain equal numbers of protons and electrons.", "Protons have a +1 charge, Electrons have a -1 charge.", "The charges cancel out exactly."] },
+        { section: "2.1 Atomic Structure", q: "Explain why most of the mass of an atom is concentrated in the nucleus.", a: ["Protons and neutrons are located in the nucleus.", "Electrons have negligible mass (approx 1/1840 of a proton)."] },
+        { section: "2.1 Atomic Structure", q: "Describe how evidence from scattering experiments led to the nuclear model of the atom.", a: ["Most alpha particles passed straight through → Atom is mostly empty space.", "Some were deflected/reflected → Mass and positive charge are concentrated in a small central nucleus."] },
+
+        // 2.2 Relative mass and charge
+        { section: "2.2 Relative Mass & Charge", q: "State the relative mass and charge of a proton, neutron and electron.", a: ["Proton: Mass 1, Charge +1", "Neutron: Mass 1, Charge 0", "Electron: Mass 1/1840 (negligible), Charge -1"] },
+        { section: "2.2 Relative Mass & Charge", q: "Explain why the electron has negligible mass compared with a proton.", a: ["The mass of an electron is approximately 1/1840 of the mass of a proton.", "It contributes very little to the total mass of the atom."] },
+        { section: "2.2 Relative Mass & Charge", q: "Calculate the relative mass of all the neutrons in a silicon atom (Si-28).", a: ["Silicon Atomic No = 14.", "Neutrons = 28 - 14 = 14.", "Relative Mass = 14 × 1 = 14."] },
+
+        // 2.3 Atomic number and mass number
+        { section: "2.3 Atomic & Mass Number", q: "Define atomic (proton) number.", a: ["The number of protons in the nucleus of an atom."] },
+        { section: "2.3 Atomic & Mass Number", q: "Define mass number.", a: ["The total number of protons and neutrons in the nucleus of an atom."] },
+        { section: "2.3 Atomic & Mass Number", q: "Explain why atoms of the same element always have the same atomic number.", a: ["The atomic number determines the identity of the element.", "Changing the number of protons changes the element."] },
+        { section: "2.3 Atomic & Mass Number", q: "An atom has 13 protons and 14 neutrons. Write its nuclide notation.", a: ["Element is Aluminum (Al, Z=13).", "Mass number = 13 + 14 = 27.", "Notation: <sup>27</sup><sub>13</sub>Al"] },
+
+        // 2.4 Atoms and ions
+        { section: "2.4 Atoms and Ions", q: "Determine the numbers of protons, neutrons and electrons in a <sup>56</sup>Fe<sup>2+</sup> ion.", a: ["Protons: 26 (Atomic No. of Fe)", "Neutrons: 30 (56 - 26)", "Electrons: 24 (26 - 2)"] },
+        { section: "2.4 Atoms and Ions", q: "Explain why positive ions are smaller than their parent atoms.", a: ["Electrons are removed from the outer shell.", "Remaining electrons experience the same nuclear charge but less shielding (or are pulled closer due to higher effective nuclear charge/ratio).", "Sometimes an entire electron shell is lost."] },
+        { section: "2.4 Atoms and Ions", q: "Explain why the formation of ions does not involve a change in the nucleus.", a: ["Ion formation involves the loss or gain of electrons only.", "The nucleus (protons/neutrons) remains unchanged."] },
+
+        // 2.5 Isotopes
+        { section: "2.5 Isotopes", q: "Define the term isotope.", a: ["Atoms of the same element with the same number of protons but different numbers of neutrons."] },
+        { section: "2.5 Isotopes", q: "Explain why isotopes of the same element have identical chemical properties.", a: ["They have the same electronic configuration.", "Chemical properties depend on the outer shell electrons."] },
+        { section: "2.5 Isotopes", q: "Chlorine exists as two isotopes, <sup>35</sup>Cl and <sup>37</sup>Cl. State one difference between these isotopes.", a: ["Different mass number.", "Different number of neutrons (18 vs 20).", "Different physical properties (e.g., density/rate of diffusion)."] },
+        { section: "2.5 Isotopes", q: "Explain why isotopes have different physical properties.", a: ["Physical properties depend on mass.", "Isotopes have different masses due to different neutron numbers."] },
+
+        // 2.6 Mass spectrometry
+        { section: "2.6 Mass Spectrometry", q: "Describe how ions are formed in a mass spectrometer.", a: ["High energy electrons are fired at the gaseous sample.", "This knocks off an electron.", "Equation: M(g) + e<sup>-</sup> → M<sup>+</sup>(g) + 2e<sup>-</sup>"] },
+        { section: "2.6 Mass Spectrometry", q: "Explain why ions are accelerated in an electric field.", a: ["To give all ions the same kinetic energy.", "So they can be separated based on their mass (velocity depends on mass)."] },
+        { section: "2.6 Mass Spectrometry", q: "Explain how the mass-to-charge ratio (m/z) of ions is determined.", a: ["By the time of flight (TOF) or degree of deflection.", "Heavier ions move slower / deflect less.", "Lighter ions move faster / deflect more."] },
+        { section: "2.6 Mass Spectrometry", q: "A mass spectrum shows peaks at m/z 63 and 65. Identify the element present and explain your reasoning.", a: ["Element: Copper (Cu).", "These are the common isotopes of Copper (<sup>63</sup>Cu and <sup>65</sup>Cu)."] },
+
+        // 2.7 Diatomic mass spectra – chlorine
+        { section: "2.7 Diatomic Mass Spectra (Cl₂)", q: "State the m/z values of the molecular ion peaks expected in the mass spectrum of chlorine gas.", a: ["70, 72, 74"] },
+        { section: "2.7 Diatomic Mass Spectra (Cl₂)", q: "Explain why three molecular ion peaks are observed for Cl₂.", a: ["Combinations of <sup>35</sup>Cl and <sup>37</sup>Cl:", "35+35 = 70", "35+37 = 72", "37+37 = 74"] },
+        { section: "2.7 Diatomic Mass Spectra (Cl₂)", q: "Calculate the expected relative heights of the Cl₂ peaks using isotopic abundances (<sup>35</sup>Cl 75%, <sup>37</sup>Cl 25%).", a: ["Ratio 3:1.", "70: 3/4 × 3/4 = 9/16", "72: 2 × (3/4 × 1/4) = 6/16", "74: 1/4 × 1/4 = 1/16", "Ratio: 9 : 6 : 1"] },
+
+        // 2.8 Ionisation energy definitions
+        { section: "2.8 Ionisation Energy Definitions", q: "Define first ionisation energy.", a: ["Energy required to remove one mole of electrons from one mole of gaseous atoms to form one mole of gaseous 1+ ions."] },
+        { section: "2.8 Ionisation Energy Definitions", q: "Write an equation to represent the first ionisation energy of magnesium.", a: ["Mg(g) → Mg<sup>+</sup>(g) + e<sup>-</sup> (State symbols are essential!)"] },
+        { section: "2.8 Ionisation Energy Definitions", q: "Explain why ionisation energies are endothermic.", a: ["Energy is required to overcome the electrostatic attraction between the negative electron and the positive nucleus."] },
+
+        // 2.9 Orbitals
+        { section: "2.9 Orbitals", q: "Define the term orbital.", a: ["A region within an atom that can hold up to two electrons with opposite spins."] },
+        { section: "2.9 Orbitals", q: "Explain why an orbital can hold a maximum of two electrons.", a: ["Pauli Exclusion Principle.", "Two electrons in the same orbital must have opposite spins to minimize repulsion."] },
+        { section: "2.9 Orbitals", q: "Explain the difference between an orbital and an electron shell.", a: ["A shell is a principal energy level (n=1, 2, 3...).", "An orbital is a sub-division of a shell (s, p, d, f) describing the specific probability region."] },
+
+        // 2.10 Factors affecting ionisation energy
+        { section: "2.10 Factors Affecting IE", q: "Explain how nuclear charge affects ionisation energy.", a: ["Higher nuclear charge (more protons) means stronger attraction for outer electrons.", "Increases Ionisation Energy."] },
+        { section: "2.10 Factors Affecting IE", q: "Explain how electron shielding affects ionisation energy.", a: ["More inner shells repel the outer electron.", "Reduces the effective nuclear charge felt by the outer electron.", "Decreases Ionisation Energy."] },
+        { section: "2.10 Factors Affecting IE", q: "Explain how distance of the outer electron from the nucleus affects ionisation energy.", a: ["Greater distance means weaker attraction between nucleus and electron (Inverse Square Law).", "Decreases Ionisation Energy."] },
+
+        // 2.11 Successive ionisation energies
+        { section: "2.11 Successive IE", q: "Successive ionisation energies of an element show a large increase after removal of the second electron. Deduce the group of the element.", a: ["Group 2.", "The huge jump indicates the 3rd electron is being removed from a new, inner shell which is closer to the nucleus."] },
+        { section: "2.11 Successive IE", q: "Explain how successive ionisation energies provide evidence for electron shells.", a: ["Large jumps in energy occur when an electron is removed from a shell closer to the nucleus.", "This confirms electrons exist in distinct energy levels."] },
+
+        // 2.12 Shapes of orbitals
+        { section: "2.12 Shapes of Orbitals", q: "Describe the shape of an s orbital.", a: ["Spherical"], diagram: "s_orb" },
+        { section: "2.12 Shapes of Orbitals", q: "Describe the shape of a p orbital.", a: ["Dumbbell shaped"], diagram: "p_orb" },
+        { section: "2.12 Shapes of Orbitals", q: "Explain why p orbitals have directional properties.", a: ["They are aligned along axes (x, y, z).", "s orbitals are spherical and non-directional."] },
+
+        // 2.13 Electron filling and pairing
+        { section: "2.13 Electron Filling", q: "State Hund’s rule.", a: ["Electrons occupy degenerate (same energy) orbitals singly with parallel spins before pairing up."] },
+        { section: "2.13 Electron Filling", q: "Draw an electron-in-boxes diagram for the 3p sub-shell of sulfur.", a: ["Sulfur is 3p<sup>4</sup>.", "Two paired in first box, one singly in second, one singly in third."], diagram: "sulfur_box" },
+        { section: "2.13 Electron Filling", q: "Explain why electrons occupy empty orbitals before pairing up.", a: ["To minimize electron-electron repulsion.", "It requires less energy to occupy an empty orbital than to pair up."] },
+
+        // 2.14 Electronic configuration
+        { section: "2.14 Electronic Configuration", q: "Write the electronic configuration of phosphorus (Z=15).", a: ["1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>2</sup> 3p<sup>3</sup>"] },
+        { section: "2.14 Electronic Configuration", q: "Write the electronic configuration of Al<sup>3+</sup>.", a: ["Al atom: 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> 3s<sup>2</sup> 3p<sup>1</sup>", "Al<sup>3+</sup>: 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup> (Isoelectronic with Neon)"] },
+        { section: "2.14 Electronic Configuration", q: "Explain why the 4s sub-shell is filled before the 3d sub-shell.", a: ["The 4s sub-shell is lower in energy than the 3d sub-shell (for neutral atoms K and Ca)."] },
+        { section: "2.14 Electronic Configuration", q: "Explain why electrons are removed from the 4s sub-shell before the 3d sub-shell in transition metals.", a: ["Once the 3d orbital contains electrons, the 4s orbital rises in energy above the 3d.", "Therefore 4s electrons are lost first."] },
+
+        // 2.15 Electronic configuration & chemical properties
+        { section: "2.15 Config & Properties", q: "Explain why elements in the same group have similar chemical properties.", a: ["They have the same number of electrons in their outer shell (valence electrons).", "This dictates how they bond and react."] },
+        { section: "2.15 Config & Properties", q: "Use electronic configuration to explain why neon is chemically unreactive.", a: ["Neon: 1s<sup>2</sup> 2s<sup>2</sup> 2p<sup>6</sup>.", "It has a full outer shell (stable octet).", "High ionisation energy, energetically unfavorable to gain/lose electrons."] },
+
+        // 2.16 Periodic table blocks
+        { section: "2.16 Blocks", q: "Define the s-block and p-block of the periodic table.", a: ["s-block: Elements with their highest energy electron in an s-orbital.", "p-block: Elements with their highest energy electron in a p-orbital."] },
+        { section: "2.16 Blocks", q: "State the maximum number of electrons in s, p and d sub-shells.", a: ["s: 2", "p: 6", "d: 10"] },
+        { section: "2.16 Blocks", q: "Identify the block to which zinc belongs and explain your answer.", a: ["d-block.", "Its outer electrons are filling the d-subshell (3d<sup>10</sup>)."] },
+
+        // 2.17 Periodic properties & graphs
+        { section: "2.17 Periodic Properties", q: "Sketch a graph of first ionisation energy against atomic number for Period 3.", a: ["General increase Na → Ar.", "Dip at Al (Group 3).", "Dip at S (Group 6)."], diagram: "graph_p3" },
+        { section: "2.17 Periodic Properties", q: "Explain why first ionisation energy is described as a periodic property.", a: ["The pattern of ionisation energies repeats across each period.", "Trends (increase across period, decrease down group) are consistent."] },
+        { section: "2.17 Periodic Properties", q: "Explain why logarithmic scales are useful when plotting successive ionisation energies.", a: ["The range of values is extremely large (from hundreds to tens of thousands).", "Log scale allows all points to be seen on one graph."] },
+
+        // 2.18 Periodic trends
+        { section: "2.18 Periodic Trends (Across)", q: "Describe the trend in first ionisation energy across Period 3.", a: ["General increase."] },
+        { section: "2.18 Periodic Trends (Across)", q: "Explain the general increase in first ionisation energy across Period 3.", a: ["Nuclear charge increases (more protons).", "Shielding remains similar (same shell).", "Atomic radius decreases.", "Attraction increases."] },
+        { section: "2.18 Periodic Trends (Deviations)", q: "Explain why aluminium has a lower first ionisation energy than magnesium.", a: ["Mg outer e<sup>-</sup> is in 3s.", "Al outer e<sup>-</sup> is in 3p.", "3p is higher energy and further away.", "3p is shielded by 3s electrons."] },
+        { section: "2.18 Periodic Trends (Deviations)", q: "Explain why sulfur has a lower first ionisation energy than phosphorus.", a: ["P is 3p<sup>3</sup> (all singly occupied).", "S is 3p<sup>4</sup> (one orbital has paired electrons).", "Spin-pair repulsion in S makes it easier to remove the electron."] },
+        { section: "2.18 Periodic Trends (Down Group)", q: "Describe the trend in first ionisation energy down Group 2.", a: ["Decreases."] },
+        { section: "2.18 Periodic Trends (Down Group)", q: "Explain why first ionisation energy decreases down Group 2.", a: ["Atomic radius increases (more shells).", "Shielding increases.", "These factors outweigh the increase in nuclear charge."] },
+        { section: "2.18 Periodic Trends (Comparative)", q: "Explain which element has the higher first ionisation energy: lithium or sodium.", a: ["Lithium.", "Sodium is further down the group (more shielding, larger radius)."] },
+        { section: "2.18 Periodic Trends (Comparative)", q: "Compare the first ionisation energies of sodium, magnesium and aluminium.", a: ["Na < Al < Mg", "Na is lowest (Group 1).", "Mg is highest (Group 2, stable s<sup>2</sup>).", "Al is lower than Mg (anomaly) but higher than Na."] }
+    ];
+
+    // --- LOGIC ---
+    const container = document.getElementById('quiz-container');
+    const totalScoreEl = document.getElementById('totalScore');
+    const maxScoreEl = document.getElementById('maxScore');
+    let scores = new Array(questionsDB.length).fill(0);
+    
+    // Set Max Score
+    maxScoreEl.textContent = questionsDB.length * 5;
+
+    // Helper: Visualizations
+    function getVisual(type) {
+        if (!type) return "";
+        
+        if (type === "s_orb") return `
+            <div class="diagram-container">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="30" fill="none" stroke="#2c3e50" stroke-width="2"/>
+                <text x="50" y="90" text-anchor="middle" font-size="10">s-orbital (Spherical)</text>
+            </svg>
+            </div>`;
+            
+        if (type === "p_orb") return `
+            <div class="diagram-container">
+            <svg width="100" height="100" viewBox="0 0 100 100">
+                <path d="M50,50 C50,20 70,20 70,50 C70,80 50,80 50,50 Z M50,50 C50,20 30,20 30,50 C30,80 50,80 50,50 Z" fill="none" stroke="#2c3e50" stroke-width="2"/>
+                <text x="50" y="90" text-anchor="middle" font-size="10">p-orbital (Dumbbell)</text>
+            </svg>
+            </div>`;
+            
+        if (type === "sulfur_box") return `
+            <div class="diagram-container">
+                <div><strong>3p Sub-shell (Sulfur)</strong></div>
+                <div class="electron-box-container">
+                    <div class="e-box">⇅</div>
+                    <div class="e-box">↑</div>
+                    <div class="e-box">↑</div>
+                </div>
+                <div style="font-size:0.8rem; margin-top:5px;">(Paired first, then single)</div>
+            </div>`;
+            
+        if (type === "graph_p3") return `
+            <div class="diagram-container">
+            <svg width="300" height="150" viewBox="0 0 300 150">
+                <line x1="30" y1="130" x2="280" y2="130" stroke="#000" />
+                <line x1="30" y1="130" x2="30" y2="10" stroke="#000" />
+                <text x="150" y="145" font-size="12" text-anchor="middle">Atomic Number (Na → Ar)</text>
+                <text x="15" y="75" font-size="12" transform="rotate(-90 15,75)" text-anchor="middle">IE</text>
+                <polyline points="40,110 70,50 100,70 130,40 160,20 190,45 220,15 250,5" fill="none" stroke="#e74c3c" stroke-width="2" />
+                <circle cx="40" cy="110" r="3" fill="#2c3e50"/><text x="40" y="125" font-size="10" text-anchor="middle">Na</text>
+                <circle cx="70" cy="50" r="3" fill="#2c3e50"/><text x="70" y="45" font-size="10" text-anchor="middle">Mg</text>
+                <circle cx="100" cy="70" r="3" fill="#2c3e50"/><text x="100" y="85" font-size="10" text-anchor="middle">Al</text>
+                <circle cx="160" cy="20" r="3" fill="#2c3e50"/><text x="160" y="15" font-size="10" text-anchor="middle">P</text>
+                <circle cx="190" cy="45" r="3" fill="#2c3e50"/><text x="190" y="60" font-size="10" text-anchor="middle">S</text>
+            </svg>
+            </div>`;
+
+        return "";
+    }
+
+    // Render Logic
+    let currentSection = "";
+
+    questionsDB.forEach((item, index) => {
+        // Render Section Header
+        if (item.section !== currentSection) {
+            currentSection = item.section;
+            const header = document.createElement('div');
+            header.className = 'section-title';
+            header.textContent = currentSection;
+            container.appendChild(header);
+        }
+
+        const block = document.createElement('div');
+        block.className = 'qa-block';
+        
+        const vizHTML = getVisual(item.diagram);
+        const answerList = item.a.map(point => `<li>${point}</li>`).join('');
+
+        block.innerHTML = `
+            <div class="qa-header">
+                <div class="question-text">
+                    <span style="color:#e67e22; margin-right:5px;">Q${index+1}.</span>
+                    ${item.q}
+                    ${vizHTML ? `<div style="font-size:0.85rem; color:#95a5a6; margin-top:5px;">(Visual Answer Available)</div>` : ''}
+                </div>
+                <div class="score-select-container">
+                    <label>Score</label>
+                    <select onchange="updateScore(${index}, this.value)">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+            </div>
+            <button class="reveal-btn" onclick="toggleAnswer(this)">
+                <span>Show Answer</span>
+            </button>
+            <div class="answer-content">
+                ${vizHTML}
+                <ul>${answerList}</ul>
+            </div>
+        `;
+        container.appendChild(block);
+    });
+
+    // --- FUNCTIONS ---
+    function toggleAnswer(btn) {
+        const content = btn.nextElementSibling;
+        const isVisible = content.classList.contains('visible');
+        
+        if (isVisible) {
+            content.classList.remove('visible');
+            btn.classList.remove('active');
+            btn.querySelector('span').textContent = "Show Answer";
+        } else {
+            content.classList.add('visible');
+            btn.classList.add('active');
+            btn.querySelector('span').textContent = "Hide Answer";
+        }
+    }
+
+    function updateScore(index, value) {
+        scores[index] = parseInt(value);
+        const total = scores.reduce((a, b) => a + b, 0);
+        totalScoreEl.textContent = total;
+    }
+
+    // Timer
+    let seconds = 0;
+    setInterval(() => {
+        seconds++;
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        document.getElementById('timer').textContent = `${m}:${s}`;
+    }, 1000);
+
+</script>
+
+</body>
+</html>
